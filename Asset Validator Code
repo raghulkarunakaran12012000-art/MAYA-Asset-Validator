@@ -9,81 +9,91 @@ import re
  
 def asset_name_check(asset_sm):
     meshname = []
-    for i in asset_sm:
-        asset_name = cmds.listRelatives(i, parent=True) 
-        if (asset_name[0].startswith("SM_") and re.search(r"\d+$", asset_name[0])):  
-            meshname.append(asset_name[0] + " = perfect")
-        else:
-            meshname.append(asset_name[0] + " = Notperfect")
+    asset_name = cmds.listRelatives(asset_sm, parent=True) 
+    if (asset_name[0].startswith("SM_") and re.search(r"\d+$", asset_name[0])):  
+        meshname.append(asset_name[0] + " = perfect")
+    else:
+        meshname.append(asset_name[0] + " = Notperfect")
+    print("___Mesh name___")
     return meshname
 
 #______________________________________TRANSFORM CHECK_________________________________________#
 
 def Transform_check(asset_sm):
     transform = []
-    for i in asset_sm:
-        pos = cmds.listRelatives(i,parent=True)[0]
-        trans = cmds.xform(pos, query = True, translation=True)
-        deg = cmds.getAttr(pos + ".rotate") 
-        size = cmds.xform(pos, query = True, scale=True, worldSpace=True)
-        if ((trans==[0.0, 0.0, 0.0]) and (deg==[(0.0,0.0,0.0)]) and (size==[1.0, 1.0, 1.0])):
-	        transform.append((cmds.listRelatives(i, parent=True)[0]) + " = transform Perfect")
-        else:
-            if(trans!=[0.0, 0.0, 0.0]):
-                transform.append(i + " = Moved")
+    pos = cmds.listRelatives(asset_sm,parent=True)[0]
+    trans = cmds.xform(pos, query = True, translation=True)
+    deg = cmds.getAttr(pos + ".rotate") 
+    size = cmds.xform(pos, query = True, scale=True, worldSpace=True)
+    if ((trans==[0.0, 0.0, 0.0]) and (deg==[(0.0,0.0,0.0)]) and (size==[1.0, 1.0, 1.0])):
+	    transform.append((cmds.listRelatives(asset_sm, parent=True)[0]) + " = transform Perfect")
+    else:
+        if(trans!=[0.0, 0.0, 0.0]):
+            transform.append(asset_sm + " = Moved")
 
-            if(deg!=[(0.0,0.0,0.0)]):
-                transform.append(i + " = Rotated")
+        if(deg!=[(0.0,0.0,0.0)]):
+            transform.append(asset_sm + " = Rotated")
 
-            if(size!=[1.0, 1.0, 1.0]):
-                transform.append(i + " = Scaled")
+        if(size!=[1.0, 1.0, 1.0]):
+            transform.append(asset_sm + " = Scaled")
+    print("___Transform check___")
     return transform
 
 #______________________________________MESH EVALUATION_________________________________________#
 
-def mesh_Evaluate(asset_sm):
+def mesh_Evaluate(asset):
     # QUAD CHECK
     QC = []
     EC = []
-    for i in asset_sm:
-        face = cmds.polyEvaluate(i, face=True)
-        edge = cmds.polyEvaluate(i, edge=True)
-        vert = cmds.polyEvaluate(i, vertex=True)		
-        j=0
-        for j in range(face):
-            a = cmds.polyInfo(f"{i}.f{[j]}", faceToVertex = True) # FACE 0: 0 1 2 3
-            count = 0
-            t1 = a[0].split(':')
-            t2 = t1[1].split(' ')
-            #print(t2)
-            t=0
-            for t in range (len(t2)):
-                if(t2[t]!=''):
-                    count=count+1
-                t=t+1                
-            q = count -1
-            if((q != 4)):# & (q>4)):
-                QC.append("Not a Quad = " + a[0])
-    
+    Quads = []
+    Edgecheck = [] 
+    face = cmds.polyEvaluate(asset, face=True)
+    edge = cmds.polyEvaluate(asset, edge=True)
+    vert = cmds.polyEvaluate(asset, vertex=True)		
+    j=0
+    for j in range(face):
+        a = cmds.polyInfo(f"{asset}.f{[j]}", faceToVertex = True) # FACE 0: 0 1 2 3
+        count = 0
+        t1 = a[0].split(':')
+        t2 = t1[1].split(' ')
+        t=0
+        index=0
+        for t in range (len(t2)):
+            if(t2[t]!=''):
+                count=count+1
+            t=t+1                
+        q = count -1
+        if((q != 4)):# & (q>4)):
+            QC.append("Not a Quad = " + a[0])
+            index = 1
+    if(index!=1):
+        QC.append("Its a QUAD")
+            
     # EDGE CHECK
-        j=0
-        for j in range(edge):
-            a = cmds.polyInfo(f"{i}.e{[j]}", edgeToFace = True) # FACE 0: 0 1 2 3
-            count = 0
-            t1 = a[0].split(':') # O/P as list
-            t2 = t1[1].split(' ') # O/P as list 
-            t=0
-            q=0
-            for t in range(len(t2)):
-                if(t2[t]!=''):
-                    count=count+1
-                t=t+1                
-            q = count-1
-            if((q != 2) & (q != 1)):
-                #print(q)
-                #print("non-manifold = " + a[0])# + f"{q}") 
-                EC.append("non-manifold = " + f"{a[0]}")# + f"{q}")
+    j=0        
+    for j in range(edge):
+        a = cmds.polyInfo(f"{asset}.e{[j]}", edgeToFace = True) # FACE 0: 0 1 2 3
+        count = 0
+        t1 = a[0].split(':') # O/P as list
+        t2 = t1[1].split(' ') # O/P as list 
+        t=0
+        q=0
+        index=0
+        for t in range(len(t2)):
+            if(t2[t]!=''):
+                count=count+1
+            t=t+1                
+        q = count-1
+        if((q != 2) & (q != 1)):
+            EC.append("non-manifold = " + f"{a[0]}")# + f"{q}")
+            index = 1
+    if(index!=1):
+        EC.append("Its Manifold")      
+    #print("___Mesh Evaluation___", QC, EC)
+    #Quads.append(QC)
+    #Edgecheck.append(EC)
     return (QC, EC)
+
     
 #______________________________________MATERIAL CHECK_________________________________________#
 
@@ -93,79 +103,122 @@ def material_Check(asset_sm, asset_tr):
     mat = []
     mat_Dict = {}
     mat_assigned = []  
-    for i in asset_sm:
-        asset_sg = []
-        asset_name = cmds.listRelatives(i, parent=True) 
-        asset_sg.append(list(set(cmds.listConnections(i, type="shadingEngine"))))
-        for j in asset_sg:
-            for sg in j:
-                asset_m.append(cmds.listConnections(sg + ".surfaceShader", source=True, destination=False))
-            mat_assigned.append(j)
-            mat_name = set()
-            for m in asset_m:
-                if (m[0].startswith("M_")):
+    asset_sg = []
+    asset_name = cmds.listRelatives(asset_sm, parent=True) 
+    asset_sg.append(list(set(cmds.listConnections(asset_sm, type="shadingEngine"))))
+    for j in asset_sg:
+        for sg in j:
+            asset_m.append(cmds.listConnections(sg + ".surfaceShader", source=True, destination=False))
+        mat_assigned.append(j)
+        mat_name = set()
+        for m in asset_m:
+            if (m[0].startswith("M_")):
                     #print(m[0])
-                    mat_name.add(m[0] + " = perfect")
-                else:
-                    mat_name.add(m[0] + " = Notperfect")
+                mat_name.add(m[0] + " = perfect")
+            else:
+                mat_name.add(m[0] + " = Notperfect")
         #mat_Dict.fromkeys(mat_assigned, mat_name)
         #mat_Dict.values(mat_name)
     mat_Dict = dict(zip(asset_tr, mat_assigned))
-    print(mat_name)
-    return(mat_Dict)                    
-    #return(mat_name, mat_assigned)
+    print("___Material check___")
+    #print(mat_name)
+    #return(mat_Dict)                    
+    return(mat_name, mat_assigned)
 
 
 #______________________________________TEXTURE FILE CHECK_________________________________________#
 
 def tex_path_connection(asset_sm):
-    for i in asset_sm:
-        asset_sg = list(set(cmds.listConnections(i, type="shadingEngine")))
-        print(i, asset_sg)
-        for j in asset_sg:
-            asset_m = cmds.listConnections(j + ".surfaceShader", source=True, destination=False)
-            attr = ['baseColor', 'specularRoughness', 'metalness', 'opacity', 'normalCamera']
-            for m in asset_m:
-                for a in attr:
-                    connection = cmds.listConnections(m + "." + a)
-                    if connection:
-                        tex_file= cmds.getAttr(connection[0] + ".fileTextureName") # os.path.exists(connection[0])
-                        print(tex_file)
+    asset_sg = list(set(cmds.listConnections(asset_sm, type="shadingEngine")))
+    texlist = []
+        #print(asset_sm, asset_sg)
+    for j in asset_sg:
+        asset_m = cmds.listConnections(j + ".surfaceShader", source=True, destination=False)
+        attr = ['baseColor', 'specularRoughness', 'metalness', 'opacity', 'normalCamera']
 
-
+        for m in asset_m:
+            tex = []
+            for a in attr:
+                connection = cmds.listConnections(m + "." + a)
+                if connection:
+                    tex_file= cmds.getAttr(connection[0] + ".fileTextureName") # os.path.exists(connection[0])
+                    tex.append(f"{tex_file}")
+                        #print(tex_file)
+            #print("___Texture check___")
+            texlist.append(f"{tex}\n")
+            #with open(ResultPath, 'a') as wf:
+                #wf.write(f"{tex}\n\n")
+    return texlist
     
-asset_sm = cmds.ls(type="mesh") # shapenode
-asset_tr = cmds.ls(type="transform") # transform
-asset_m = cmds.ls(type="shadingEngine") # material
-meshname = asset_name_check(asset_sm)
-transform = Transform_check(asset_sm)
-meshEvaluate = mesh_Evaluate(asset_sm)
-materialCheck = material_Check(asset_sm, asset_tr)
-print(meshname)
-print(transform)
-print(meshEvaluate)
-print(materialCheck)
-tex_path_connection(asset_sm)
+#______________________________________ASSET DETAILS_________________________________________#
 
-"""
+def asset_details(meshname, transform, meshEvaluate, materialCheck, textureCheck):
+    #i=0
+    #asset_sm = cmds.ls(type="mesh")
+    #asset_tr = cmds.ls(type="transform")
+    ResultPath = r'D:\VFX_Learning\Tech_&_AI_for_VFX\VFX_tech_Projects\Project_1_and_2\Shapes_and_Tech\data\Asset_validation_files\Output_files\Asset_Validation_Result.txt'
+    with open(ResultPath, 'a') as wf:
+        wf.write(f"MESH NAME: {meshname}\n")
+        wf.write(f"TRANSFORM CHECK: {transform}\n")
+        #print(asset_sm[i])
+        wf.write(f"MESH EVALUATE: {meshEvaluate}\n")
+        #for k, v in materialCheck.items():
+        wf.write(f"MATERIAL CHECK: {materialCheck}\n")
+        wf.write(f"TEXTURE CHECK: {textureCheck}\n\n")
+        #i=i+1
+        #k=k+1
+        #v=v+1
 
-ASSET VALIDATOR
-│
-├── Naming Check
-├── Transform Check
-├── Mesh Check
-│   ├── Faces
-│   ├── Edges
-│   └── Non-Manifold
-├── Material Check
-│   ├── Assigned Material
-│   └── Material Naming
-├── Texture Check
-│   ├── Connected Texture Nodes
-│   ├── Texture Naming
-│   ├── File Path
-│   └── Missing Files
-└── Validation Report
+def reports():  
+    asset_sm = cmds.ls(type="mesh") # shapenode
+    asset_tr = cmds.ls(type="transform") # transform
+    asset_m = cmds.ls(type="shadingEngine") # material
+    tr=0
+    for i in asset_sm:
+        print(i, tr)
+        meshname = asset_name_check(i)
+        transform = Transform_check(i)
+        meshEvaluate = mesh_Evaluate(i)
+        materialCheck = material_Check(i, asset_tr[tr])
+        textureCheck = tex_path_connection(i)   
+        asset_details(meshname, transform, meshEvaluate, materialCheck, textureCheck)
+        tr = tr+1
+
+def main():
+    Render = int(input("Enter One"))
+    ResultPath = r'D:\VFX_Learning\Tech_&_AI_for_VFX\VFX_tech_Projects\Project_1_and_2\Asset_Validator\Output_files\Asset_validation_report.txt'    
+    if(Render == 1):
+        with open(ResultPath, "w") as Clear:
+            pass
+        reports()
+    else:
+        reports()
+
+if cmds.window("asset_Validator_Window", exists=True):
+    cmds.deleteUI("asset_Validator_Window")
+
+window = cmds.window(
+    "asset_Validator_Window",
+    title="Asset Validator",
+    widthHeight=(300, 150)
+)
+
+cmds.columnLayout(adjustableColumn=True, rowSpacing=15)
+
+cmds.button(label="Scan Asset", height = 60, command = lambda X: main())
+
+cmds.showWindow(window)
 
 
-"""
+
+# I created shelf named "self_created"
+# Add item "Asset_Validator"
+# paste script in Double click command in Python Mode
+# Add Icon png for good visible
+# Save Shelves
+# Click Icon
+# Pop-up with Scan Asset button.
+# Click button "Scan Asset"
+# Enter '1'
+# Result stored in the mentioned path
+

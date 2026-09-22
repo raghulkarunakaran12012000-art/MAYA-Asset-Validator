@@ -42,7 +42,9 @@ def Transform_check(asset_sm):
     return transform
 
 #______________________________________MESH EVALUATION_________________________________________#
-
+# Here we are checking Two things
+	# Every faces are quad, Else it is not a quad
+	# Edges have max two faces. Else, it is Manifold
 def mesh_Evaluate(asset):
     # QUAD CHECK
   

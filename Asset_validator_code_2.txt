@@ -168,26 +168,7 @@ def asset_details(meshname, transform, meshEvaluate, materialCheck, textureCheck
         wf.write(f"TRANSFORM CHECK: {transform}\n\n")
         wf.write(f"MESH EVALUATE: {meshEvaluate}\n\n")
         wf.write(f"MATERIAL CHECK: {materialCheck}\n\n")
-        """
-    for i in asset_sm:
-        k=0
-        v=0
-        print(i)
-        ResultPath = r'D:\VFX_Learning\Tech_&_AI_for_VFX\VFX_tech_Projects\Project_1_and_2\Shapes_and_Tech\data\Asset_validation_files\Output_files\Asset_Validation_Result.txt'
-        with open(ResultPath, 'a') as wf:
-            wf.write(f"MESH NAME: {meshname}\n\n")
-            wf.write(f"TRANSFORM CHECK: {transform}\n\n")
-            print(i)
-            wf.write(f"MESH EVALUATE: {mesh_Evaluate}\n\n")
-            wf.write(f"MATERIAL CHECK: {materialCheck}\n\n")
-            for k, v in materialCheck.items():
-                wf.write(f"MATERIAL CHECK: {k}:{v}\n\n")
-                continue
-            #wf.write(f"TEXTURE CHECK: {textureCheck[i]}\n\n")
-        #i=i+1
-        #k=k+1
-        #v=v+1
-"""
+
     
 asset_sm = cmds.ls(type="mesh") # shapenode
 asset_tr = cmds.ls(type="transform") # transform
@@ -199,32 +180,5 @@ materialCheck = material_Check(asset_sm, asset_tr)
 textureCheck = tex_path_connection(asset_sm)
 asset_details(meshname, transform, meshEvaluate, materialCheck, textureCheck)
 
-"""
-ResultPath = r'D:\VFX_Learning\Tech_&_AI_for_VFX\VFX_tech_Projects\Project_1_and_2\Shapes_and_Tech\data\Asset_validation_files\Output_files\Asset_Validation_Result.txt'
-with open(ResultPath, 'w') as wf:
-	wf.write(f"MESH NAME: {meshname}\n\n")
-	wf.write(f"TRANSFORM CHECK: {transform}\n\n")
-	wf.write(f"MESH EVALUATE: {meshEvaluate}\n\n")
-	wf.write(f"MATERIAL CHECK: {materialCheck}\n\n")
-	wf.write(f"TEXTURE CHECK: {textureCheck}\n\n")
-"""
-"""
-with open(ResultPath, 'w') as wf:
-    #print("___Mesh name___")
-    wf.write(f"{meshname}")
-	#print("___Transform check___")
-	wf.write(f"{transform}")
-	#print("___Mesh Evaluation___")
-	wf.write(f"{meshEvaluate}")
-	#print("___Material check___")
-	wf.write(f"{materialCheck}")
-	#print("___Texture check___")
-	wf.write(f"{tex_path_connection(asset_sm)}")
 
-print(meshname)
-print(transform)
-print(meshEvaluate)
-print(materialCheck)
-tex_path_connection(asset_sm)
 
-"""
